@@ -33,15 +33,24 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 }
 
 // ── CORS ──────────────────────────────────────────────────
-const allowedOrigins = (process.env.FRONTEND_URL || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  "https://usa-docs.com",
+  "https://www.usa-docs.com",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+// Also add any origins from FRONTEND_URL env var
+if (process.env.FRONTEND_URL) {
+  process.env.FRONTEND_URL.split(",").forEach((s) => {
+    const trimmed = s.trim().replace(/\/+$/, "");
+    if (trimmed && !allowedOrigins.includes(trimmed)) allowedOrigins.push(trimmed);
+  });
+}
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin))
-        return cb(null, true);
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      console.log("CORS blocked origin:", origin);
       cb(null, false);
     },
   })
